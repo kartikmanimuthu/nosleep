@@ -155,12 +155,12 @@ Run `npm start` in a real terminal and verify each item:
 
 ---
 
-## 4. Known Limitation
+## 4. TTY Requirement
 
-Ink requires an interactive TTY. Running the app via:
+Ink requires an interactive TTY. If you run the app outside one (backgrounded in a script, piped stdin, CI), it exits cleanly with:
 
-```bash
-npx tsx source/cli.jsx &   # backgrounded in a script
+```
+nosleep requires an interactive terminal. Run it directly in your terminal, not inside a script.
 ```
 
-...will throw `Raw mode is not supported`. This is expected — always run the app in a foreground terminal session.
+Always run the app in a foreground terminal session (`npm start`).
