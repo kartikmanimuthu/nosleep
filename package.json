@@ -1,9 +1,34 @@
 {
   "name": "nosleep",
   "version": "1.0.0",
-  "description": "TUI app to prevent macOS from sleeping",
+  "description": "☕ Keep your Mac awake — background daemon TUI built with React Ink",
   "type": "module",
-  "bin": "./source/cli.jsx",
+  "bin": {
+    "nosleep": "./source/cli.jsx"
+  },
+  "main": "./source/cli.jsx",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kartikmanimuthu/nosleep.git"
+  },
+  "homepage": "https://github.com/kartikmanimuthu/nosleep",
+  "bugs": {
+    "url": "https://github.com/kartikmanimuthu/nosleep/issues"
+  },
+  "author": "Kartik Manimuthu",
+  "license": "MIT",
+  "keywords": [
+    "macos",
+    "caffeinate",
+    "sleep-prevention",
+    "tui",
+    "cli",
+    "daemon",
+    "react-ink"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "start": "tsx source/cli.jsx",
     "daemon": "tsx source/daemon.js",

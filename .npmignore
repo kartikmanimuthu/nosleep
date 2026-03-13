@@ -1,0 +1,12 @@
+.claude/
+.github/
+.git/
+.gitignore
+.claudeignore
+node_modules/
+*.log
+TESTING.md
+SETUP.md
+CLAUDE.md
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
