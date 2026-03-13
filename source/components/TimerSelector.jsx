@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Text } from 'ink';
 
 const PRESETS = [
-  { label: '∞',    seconds: 0 },
+  { label: 'infinite', seconds: 0 },
   { label: '15m',  seconds: 900 },
   { label: '30m',  seconds: 1800 },
   { label: '1h',   seconds: 3600 },

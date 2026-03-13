@@ -8,10 +8,19 @@ import { HelpBar } from './HelpBar.jsx';
 const MODES = ['idle', 'display', 'system', 'all'];
 const FOCUS_ROWS = ['mode', 'timer'];
 
-function fmt(secs) {
-  const m = String(Math.floor(secs / 60)).padStart(2, '0');
-  const s = String(secs % 60).padStart(2, '0');
-  return `${m}:${s}`;
+function formatTime(secs) {
+  if (secs === null || secs === undefined) return 'infinite';
+  if (secs >= 3600) {
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    return m > 0 ? `${h}h ${m}m` : `${h}h`;
+  }
+  if (secs >= 60) {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return s > 0 ? `${m}m ${s}s` : `${m}m`;
+  }
+  return `${secs}s`;
 }
 
 export function Dashboard({ daemonState, onCommand, onDetach, onStopDetach }) {
@@ -66,8 +75,10 @@ export function Dashboard({ daemonState, onCommand, onDetach, onStopDetach }) {
 
   const timeDisplay = active
     ? (daemonState.remaining !== null
-        ? `${fmt(daemonState.remaining)} remaining`
-        : `${fmt(daemonState.elapsed)} elapsed`)
+        ? `${formatTime(daemonState.remaining)} remaining`
+        : daemonState.durationSeconds === 0
+          ? 'running indefinitely'
+          : `${formatTime(daemonState.elapsed)} elapsed`)
     : null;
 
   return (
