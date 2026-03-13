@@ -1,0 +1,17 @@
+{
+  "name": "nosleep",
+  "version": "1.0.0",
+  "description": "TUI app to prevent macOS from sleeping",
+  "type": "module",
+  "bin": "./source/cli.jsx",
+  "scripts": {
+    "start": "tsx source/cli.jsx"
+  },
+  "dependencies": {
+    "ink": "^5.1.0",
+    "react": "^18.3.1"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0"
+  }
+}
