@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsx*)",
+      "Bash(pgrep*)",
+      "Bash(pkill*)",
+      "Bash(kill*)",
+      "Bash(npm install*)",
+      "Bash(npm run*)",
+      "Bash(node*)",
+      "Bash(ls*)",
+      "Bash(mkdir*)",
+      "Bash(find*)",
+      "Bash(cat ~/.nosleep/*)",
+      "Bash(rm ~/.nosleep/*)",
+      "Bash(sleep*)"
+    ],
+    "deny": [
+      "Bash(git push*)",
+      "Bash(npm publish*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-syntax.js"
+          }
+        ]
+      }
+    ]
+  }
+}

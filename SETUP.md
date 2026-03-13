@@ -1,6 +1,6 @@
 # nosleep — Local Setup Guide
 
-A TUI app that prevents your Mac from sleeping, built with React Ink.
+A TUI app that prevents your Mac from sleeping, built with React Ink. Runs as a background daemon.
 
 ## Prerequisites
 
@@ -15,54 +15,32 @@ cd nosleep
 npm install
 ```
 
-## Running the App
+## Running
 
 ```bash
-npm start
+npm start              # same as: nosleep attach (starts daemon if needed)
 ```
 
-The app opens directly in your terminal. It needs an interactive TTY — run it in a real terminal (Terminal.app, iTerm2, etc.), not inside a script or CI environment.
-
-## Usage
-
-```
-╭────────────────────────────────────────╮
-│                                        │
-│  ☕ nosleep                             │
-│                                        │
-│  Status:  ○ inactive                   │
-│  Mode:    idle                         │
-│                                        │
-│  [space] toggle  [m] mode  [q] quit    │
-│  [t] timer: off  [c] clear timer       │
-│                                        │
-╰────────────────────────────────────────╯
-```
-
-| Key | Action |
-|-----|--------|
-| `space` | Toggle sleep prevention on/off |
-| `m` | Cycle mode: idle → display → system → all |
-| `t` | Cycle timer preset: off → 15m → 30m → 1h → 2h → 4h |
-| `c` | Clear timer (back to indefinite) |
-| `q` | Quit |
-| `Ctrl+C` | Quit |
-
-## Modes
-
-| Mode | What it prevents |
-|------|-----------------|
-| `idle` | System sleeping when idle (default) |
-| `display` | Display/screen turning off |
-| `system` | System sleep entirely (AC power only) |
-| `all` | All of the above + simulates user activity |
-
-## Verifying It Works
-
-While the app is active, open another terminal and run:
+Or use subcommands directly:
 
 ```bash
-pgrep -l caffeinate
+npx tsx source/cli.jsx start
+npx tsx source/cli.jsx status
+npx tsx source/cli.jsx stop
+npx tsx source/cli.jsx shutdown
 ```
 
-You should see a `caffeinate` process. After quitting the app, run it again — the process should be gone.
+## Config directory
+
+The daemon stores its socket, PID, and state in `~/.nosleep/`:
+
+```
+~/.nosleep/
+├── nosleep.sock    Unix domain socket (IPC)
+├── daemon.pid      Daemon process ID
+└── state.json      Persisted state
+```
+
+## TTY requirement
+
+The `attach` command requires an interactive terminal. All other subcommands (`start`, `stop`, `status`, `shutdown`) work without a TTY and can be used in scripts.

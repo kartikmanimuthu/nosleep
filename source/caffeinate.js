@@ -11,9 +11,13 @@ const modeFlags = {
 };
 
 let child = null;
+let currentMode = 'idle';
+let currentDuration = 0;
 
 export function start(mode = 'idle', durationSeconds = 0) {
   stop();
+  currentMode = mode;
+  currentDuration = durationSeconds;
   const flags = [...(modeFlags[mode] ?? modeFlags.idle)];
   if (durationSeconds > 0) flags.push('-t', String(durationSeconds));
   child = spawn('caffeinate', flags, { stdio: 'ignore' });
@@ -25,11 +29,20 @@ export function start(mode = 'idle', durationSeconds = 0) {
 
 export function stop() {
   if (child && !child.killed) {
-    child.kill('SIGTERM');
+    child.kill('SIGKILL');
     child = null;
   }
 }
 
 export function isRunning() {
   return child !== null && !child.killed;
+}
+
+export function getState() {
+  return {
+    running: isRunning(),
+    pid: child?.pid ?? null,
+    mode: currentMode,
+    durationSeconds: currentDuration,
+  };
 }

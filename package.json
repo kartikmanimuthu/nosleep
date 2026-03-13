@@ -5,7 +5,9 @@
   "type": "module",
   "bin": "./source/cli.jsx",
   "scripts": {
-    "start": "tsx source/cli.jsx"
+    "start": "tsx source/cli.jsx",
+    "daemon": "tsx source/daemon.js",
+    "lint": "for f in source/daemon.js source/caffeinate.js source/ipc.js source/client.js source/state.js source/commands/start.js source/commands/stop.js source/commands/status.js; do node --check $f || exit 1; done && echo 'syntax ok'"
   },
   "dependencies": {
     "ink": "^5.1.0",
