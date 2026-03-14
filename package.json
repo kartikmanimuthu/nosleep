@@ -32,7 +32,10 @@
   "scripts": {
     "start": "tsx source/cli.jsx",
     "daemon": "tsx source/daemon.js",
-    "lint": "for f in source/daemon.js source/caffeinate.js source/ipc.js source/client.js source/state.js source/commands/start.js source/commands/stop.js source/commands/status.js; do node --check $f || exit 1; done && echo 'syntax ok'"
+    "lint": "for f in source/daemon.js source/caffeinate.js source/ipc.js source/client.js source/state.js source/commands/start.js source/commands/stop.js source/commands/status.js; do node --check $f || exit 1; done && echo 'syntax ok'",
+    "test": "node --import=tsx/esm --test tests/ipc.test.js tests/state.test.js tests/caffeinate.test.js tests/integration.test.js",
+    "test:unit": "node --import=tsx/esm --test tests/ipc.test.js tests/state.test.js tests/caffeinate.test.js",
+    "test:integration": "node --import=tsx/esm --test tests/integration.test.js"
   },
   "dependencies": {
     "ink": "^5.1.0",

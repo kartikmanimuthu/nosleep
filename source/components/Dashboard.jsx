@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { StatusBar } from './StatusBar.jsx';
 import { ModeSelector } from './ModeSelector.jsx';
@@ -26,17 +26,27 @@ function formatTime(secs) {
 export function Dashboard({ daemonState, onCommand, onDetach, onStopDetach }) {
   const [focusIdx, setFocusIdx] = useState(0);
 
-  // Local "pending" selections (confirmed with Enter)
+  // Local "pending" selections (confirmed with Enter) — always start from daemon state
   const [pendingMode, setPendingMode] = useState(daemonState?.mode ?? 'idle');
   const [pendingTimer, setPendingTimer] = useState(daemonState?.durationSeconds ?? 0);
 
   const focus = FOCUS_ROWS[focusIdx];
   const active = daemonState?.active ?? false;
 
+  // When unfocused, show committed daemon state; when focused, show pending (browsed) selection
+  const displayMode  = focus === 'mode'  ? pendingMode  : (daemonState?.mode ?? 'idle');
+  const displayTimer = focus === 'timer' ? pendingTimer : (daemonState?.durationSeconds ?? 0);
+
   useInput((input, key) => {
-    // Navigation
-    if (key.upArrow)   { setFocusIdx(i => Math.max(0, i - 1)); return; }
-    if (key.downArrow) { setFocusIdx(i => Math.min(FOCUS_ROWS.length - 1, i + 1)); return; }
+    // Navigation — reset pending to daemon state when switching focus rows
+    if (key.upArrow || key.downArrow) {
+      const dir = key.downArrow ? 1 : -1;
+      const newIdx = Math.max(0, Math.min(FOCUS_ROWS.length - 1, focusIdx + dir));
+      setFocusIdx(newIdx);
+      setPendingMode(daemonState?.mode ?? 'idle');
+      setPendingTimer(daemonState?.durationSeconds ?? 0);
+      return;
+    }
 
     // Horizontal selection
     if (key.leftArrow || key.rightArrow) {
@@ -87,8 +97,8 @@ export function Dashboard({ daemonState, onCommand, onDetach, onStopDetach }) {
       <Text dimColor>{'─'.repeat(44)}</Text>
       <Text> </Text>
 
-      <ModeSelector selected={pendingMode} focused={focus === 'mode'} />
-      <TimerSelector selectedSeconds={pendingTimer} focused={focus === 'timer'} />
+      <ModeSelector selected={displayMode} focused={focus === 'mode'} />
+      <TimerSelector selectedSeconds={displayTimer} focused={focus === 'timer'} />
 
       <Text> </Text>
 

@@ -72,9 +72,23 @@ setInterval(() => {
   }
 }, 1000);
 
-// ── caffeinate self-exit (timer expiry) ──────────────────────────────────────
+// ── caffeinate self-exit (timer expiry or unexpected death) ──────────────────
 
-emitter.on('stopped', () => {
+const MAX_RESTART_ATTEMPTS = 3;
+let restartAttempts = 0;
+let restartResetTimer = null;
+
+emitter.on('stopped', ({ manual } = {}) => {
+  if (isRunning()) return; // stale exit from a process that was replaced — ignore
+  const isTimerExpiry = state.durationSeconds > 0 && (state.remaining ?? 0) <= 2;
+  if (!manual && !isTimerExpiry && state.active && restartAttempts < MAX_RESTART_ATTEMPTS) {
+    restartAttempts++;
+    clearTimeout(restartResetTimer);
+    restartResetTimer = setTimeout(() => { restartAttempts = 0; }, 60_000);
+    doStart(state.mode, state.durationSeconds > 0 ? Math.max(1, state.remaining ?? 1) : 0);
+    return;
+  }
+  restartAttempts = 0;
   setState({ active: false, elapsed: 0, remaining: null, startedAt: null, pid: null });
 });
 
@@ -141,10 +155,28 @@ process.on('exit', () => {
 // ── Stale socket cleanup ─────────────────────────────────────────────────────
 
 async function cleanStale() {
-  // Kill any caffeinate process left over from a previous daemon instance
+  const { readFile } = await import('node:fs/promises');
+  const { execSync } = await import('node:child_process');
+  // Kill stale daemon process if it's still running (socket was stale)
+  if (existsSync(PID_PATH)) {
+    try {
+      const oldPid = parseInt(await readFile(PID_PATH, 'utf8'), 10);
+      if (oldPid && oldPid !== process.pid) {
+        process.kill(oldPid, 'SIGTERM');
+      }
+    } catch {}
+  }
+  // Kill stale caffeinate process from previous daemon
   try {
     const saved = await loadState();
-    if (saved.pid) process.kill(saved.pid, 'SIGKILL');
+    if (saved.pid) {
+      try {
+        const cmd = execSync(`ps -p ${saved.pid} -o comm=`, { encoding: 'utf8' }).trim();
+        if (cmd.includes('caffeinate')) {
+          process.kill(saved.pid, 'SIGTERM');
+        }
+      } catch {}
+    }
   } catch {}
   if (existsSync(SOCKET_PATH)) {
     try { await unlink(SOCKET_PATH); } catch {}

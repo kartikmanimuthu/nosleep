@@ -15,13 +15,13 @@ export const TIMER_PRESETS = PRESETS;
 export function TimerSelector({ selectedSeconds, focused }) {
   return (
     <Box>
-      <Text dimColor={!focused}>Timer   </Text>
+      <Text dimColor={!focused}>Timer </Text>
       {PRESETS.map(({ label, seconds }) => {
         const isSelected = seconds === selectedSeconds;
         return (
           <Box key={label} marginRight={1}>
             {isSelected && focused
-              ? <Text color="yellow" bold>▸ {label}</Text>
+              ? <Text color="yellow" bold>▸{label}</Text>
               : isSelected
               ? <Text color="yellow">{label}</Text>
               : <Text dimColor>  {label}</Text>}

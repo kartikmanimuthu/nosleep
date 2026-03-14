@@ -87,18 +87,44 @@ Daemon → Client: `{ type: 'state', payload }`, `{ type: 'ok' }`, `{ type: 'err
 
 ## Testing
 
-No automated test runner. Manual verification:
+Uses Node.js built-in test runner (`node:test`) — no extra dependencies.
 
 ```bash
-# Full cycle test
+npm test              # all tests (unit + integration) — 55 tests
+npm run test:unit     # unit tests only (ipc, state, caffeinate) — fast, ~3s
+npm run test:integration  # E2E tests with real daemon — ~35s
+```
+
+### Test layout
+
+```
+tests/
+├── ipc.test.js          encode/createLineParser unit tests
+├── state.test.js        loadState/saveState unit tests
+├── caffeinate.test.js   caffeinate process manager unit tests (real caffeinate binary)
+├── integration.test.js  E2E: CLI → daemon → caffeinate full lifecycle
+└── helpers/
+    └── send-start.js    IPC helper for sending raw start commands with custom timers
+```
+
+### Key conventions
+
+- Each test file is isolated via `NOSLEEP_DIR=<tmpdir>` — never touches `~/.nosleep`
+- Integration tests manage their own daemon via `before`/`after` hooks per suite
+- `caffeinate.test.js` uses async `afterEach` to drain exit events between tests
+- macOS only — `caffeinate` binary required
+
+### Manual smoke tests
+
+```bash
+# Full cycle
 npx tsx source/cli.jsx start
 pgrep -l caffeinate          # should show process
-npx tsx source/cli.jsx status
 npx tsx source/cli.jsx stop
 pgrep -l caffeinate          # should be empty
 npx tsx source/cli.jsx shutdown
 
-# Stale recovery test
+# Stale recovery
 npx tsx source/cli.jsx start
 kill -9 $(cat ~/.nosleep/daemon.pid)
 npx tsx source/cli.jsx start  # should recover cleanly

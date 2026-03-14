@@ -13,6 +13,7 @@ const modeFlags = {
 let child = null;
 let currentMode = 'idle';
 let currentDuration = 0;
+const stoppedManually = new WeakSet();
 
 export function start(mode = 'idle', durationSeconds = 0) {
   stop();
@@ -21,14 +22,16 @@ export function start(mode = 'idle', durationSeconds = 0) {
   const flags = [...(modeFlags[mode] ?? modeFlags.idle)];
   if (durationSeconds > 0) flags.push('-t', String(durationSeconds));
   child = spawn('caffeinate', flags, { stdio: 'ignore' });
+  const thisChild = child;
   child.on('exit', () => {
-    child = null;
-    emitter.emit('stopped');
+    if (child === thisChild) child = null;
+    emitter.emit('stopped', { manual: stoppedManually.has(thisChild) });
   });
 }
 
 export function stop() {
   if (child && !child.killed) {
+    stoppedManually.add(child);
     child.kill('SIGKILL');
     child = null;
   }

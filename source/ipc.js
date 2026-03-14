@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 
-export const NOSLEEP_DIR  = join(homedir(), '.nosleep');
+export const NOSLEEP_DIR  = process.env.NOSLEEP_DIR ?? join(homedir(), '.nosleep');
 export const SOCKET_PATH  = join(NOSLEEP_DIR, 'nosleep.sock');
 export const STATE_PATH   = join(NOSLEEP_DIR, 'state.json');
 export const PID_PATH     = join(NOSLEEP_DIR, 'daemon.pid');
