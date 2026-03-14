@@ -134,3 +134,72 @@ npx tsx source/cli.jsx status --json
 npx tsx source/cli.jsx stop
 npx tsx source/cli.jsx shutdown
 ```
+
+---
+
+## 8. Unlink / Uninstall / Reinstall Cycle
+
+Use this to verify a clean install works end-to-end, or to reset a broken local setup.
+
+### Step 1 — Stop and unlink
+
+```bash
+# Shut down any running daemon
+nosleep shutdown 2>/dev/null || true
+
+# Confirm caffeinate is gone
+pgrep -l caffeinate   # must be empty
+
+# Remove the global npm symlink
+npm unlink -g nosleep
+
+# Confirm the command is gone
+which nosleep         # must return nothing
+
+# Remove daemon runtime files
+rm -rf ~/.nosleep
+```
+
+### Step 2 — Verify clean state
+
+```bash
+which nosleep         # nothing
+ls ~/.nosleep         # No such file or directory
+pgrep -l caffeinate   # empty
+```
+
+### Step 3 — Reinstall
+
+```bash
+# From the repo root
+npm install
+npm link
+
+# Confirm the command is back
+which nosleep         # should resolve to this repo's cli.jsx
+nosleep --help
+```
+
+### Step 4 — Smoke test after reinstall
+
+```bash
+nosleep start
+pgrep -l caffeinate          # must show one process
+nosleep status               # must show ● ACTIVE
+nosleep stop
+pgrep -l caffeinate          # must be empty
+nosleep shutdown
+```
+
+### Diagnosing startup failures
+
+If `nosleep` reports `Failed to start daemon`, check the daemon log:
+
+```bash
+cat ~/.nosleep/daemon.log
+```
+
+Common causes:
+- `tsx` not found — run `npm install` in the repo root
+- `EADDRINUSE` on the socket — stale `.sock` file; `rm ~/.nosleep/nosleep.sock` then retry
+- Permission error on `~/.nosleep` — `chmod 700 ~/.nosleep`

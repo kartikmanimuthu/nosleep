@@ -25,22 +25,33 @@ export function spawnDaemon() {
   const daemonPath = join(__dirname, 'daemon.js');
   const child = spawn(process.execPath, ['--import=tsx/esm', daemonPath], {
     detached: true,
-    stdio: 'ignore',
+    stdio: ['ignore', 'ignore', 'pipe'], // capture stderr for early crash detection
     env: { ...process.env },
+  });
+  // Log daemon stderr to a file so failures are diagnosable
+  const logPath = join(dirname(SOCKET_PATH), 'daemon.log');
+  import('node:fs').then(({ createWriteStream }) => {
+    const log = createWriteStream(logPath, { flags: 'a' });
+    child.stderr?.pipe(log);
   });
   child.unref();
 }
 
-/** Wait for the daemon socket to appear (up to 5s). */
-export async function waitForDaemon(timeoutMs = 5000) {
+/** Probe the socket with an actual connection attempt. */
+function canConnect() {
+  return new Promise((resolve) => {
+    const sock = net.createConnection(SOCKET_PATH);
+    sock.once('connect', () => { sock.destroy(); resolve(true); });
+    sock.once('error', () => resolve(false));
+  });
+}
+
+/** Wait for the daemon to be ready by probing the socket (up to 8s). */
+export async function waitForDaemon(timeoutMs = 8000) {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
-    if (existsSync(SOCKET_PATH)) {
-      // Give it a moment to start listening
-      await new Promise(r => setTimeout(r, 50));
-      if (await isDaemonRunning()) return true;
-    }
-    await new Promise(r => setTimeout(r, 100));
+    await new Promise(r => setTimeout(r, 150));
+    if (existsSync(SOCKET_PATH) && await canConnect()) return true;
   }
   return false;
 }
@@ -48,6 +59,10 @@ export async function waitForDaemon(timeoutMs = 5000) {
 /** Ensure daemon is running, spawning it if needed. Returns false if it fails to start. */
 export async function ensureDaemon() {
   if (await isDaemonRunning()) return true;
+  // Clean up stale socket so the new daemon can bind immediately
+  if (existsSync(SOCKET_PATH)) {
+    try { await import('node:fs/promises').then(({ unlink }) => unlink(SOCKET_PATH)); } catch { }
+  }
   spawnDaemon();
   return waitForDaemon();
 }
@@ -89,11 +104,11 @@ export async function subscribe(onState, onError) {
     if (msg.type === 'state') onState(msg.payload);
   });
   socket.on('data', parser);
-  socket.on('error', onError ?? (() => {}));
+  socket.on('error', onError ?? (() => { }));
   socket.on('close', () => onError?.('disconnected'));
   socket.write(encode({ type: 'subscribe' }));
   return () => {
-    try { socket.write(encode({ type: 'unsubscribe' })); } catch {}
+    try { socket.write(encode({ type: 'unsubscribe' })); } catch { }
     socket.destroy();
   };
 }
