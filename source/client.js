@@ -32,6 +32,7 @@ export function spawnDaemon() {
   } catch {}
   const child = spawn(process.execPath, ['--import=tsx/esm', daemonPath], {
     detached: true,
+    cwd: join(__dirname, '..'), // resolve tsx/esm from project root, not user's cwd
     stdio: ['ignore', 'ignore', stderrOpt],
     env: { ...process.env },
   });
