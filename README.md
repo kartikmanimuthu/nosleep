@@ -1,6 +1,22 @@
 # ☕ nosleep
 
 A macOS TUI app that keeps your Mac awake. Runs as a background daemon — close the terminal and it keeps running. Reconnect from any terminal to control it.
+```
+╭────────────────────────────────────────────────╮
+│  ☕ nosleep                          ● ACTIVE  │
+│────────────────────────────────────────────────│
+│                                                │
+│  Mode   ▸ idle   display   system   all        │
+│  Timer  ▸ off   15m   30m   1h   2h   4h      │
+│                                                │
+│  03:42 elapsed                                 │
+│  PID  12345                                    │
+│                                                │
+│────────────────────────────────────────────────│
+│  ↑/↓ focus  ←/→ select  enter confirm         │
+│  space toggle  q detach  Q stop+detach         │
+╰────────────────────────────────────────────────╯
+```
 
 ## Prerequisites
 
@@ -53,22 +69,6 @@ nosleep shutdown                 # Stop everything and kill daemon
 
 ## Interactive TUI
 
-```
-╭────────────────────────────────────────────────╮
-│  ☕ nosleep                          ● ACTIVE  │
-│────────────────────────────────────────────────│
-│                                                │
-│  Mode   ▸ idle   display   system   all        │
-│  Timer  ▸ off   15m   30m   1h   2h   4h      │
-│                                                │
-│  03:42 elapsed                                 │
-│  PID  12345                                    │
-│                                                │
-│────────────────────────────────────────────────│
-│  ↑/↓ focus  ←/→ select  enter confirm         │
-│  space toggle  q detach  Q stop+detach         │
-╰────────────────────────────────────────────────╯
-```
 
 | Key | Action |
 |-----|--------|
