@@ -25,6 +25,12 @@ A macOS TUI app that keeps your Mac awake. Runs as a background daemon — close
 
 ## Installation
 
+### Quick Install (macOS)
+```bash
+curl -fsSL https://raw.githubusercontent.com/kartikmanimuthu/nosleep/main/install.sh | bash
+```
+
+### Manual Install
 ```bash
 git clone <repo-url>
 cd nosleep
